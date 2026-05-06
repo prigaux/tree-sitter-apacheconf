@@ -1,0 +1,41 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "apacheconf",
+      "camelcase": "ApacheConf",
+      "title": "Apache Conf Http Server",
+      "scope": "source.apacheconf",
+      "file-types": [
+        ".htaccess"
+      ],
+      "injection-regex": "^apacheconf$",
+      "class-name": "TreeSitterApacheconf"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Apacheconf grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Pascal Rigaux",
+        "email": "pascal.rigaux@univ-paris1.rf"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-apacheconf",
+      "funding": ""
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": false,
+    "java": false,
+    "node": true,
+    "python": false,
+    "rust": true,
+    "swift": false,
+    "zig": false
+  }
+}
