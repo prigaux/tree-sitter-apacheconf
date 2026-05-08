@@ -1,0 +1,331 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
+  "name": "apacheconf",
+  "rules": {
+    "source_file": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_directives"
+      }
+    },
+    "comment": {
+      "type": "PATTERN",
+      "value": "#.*\\n"
+    },
+    "_directives": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_of_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "simple_directive"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tag_directive"
+        }
+      ]
+    },
+    "simple_directive": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_simple_directive_name"
+          }
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "simple_param"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_of_line"
+        }
+      ]
+    },
+    "_simple_directive_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "non_quoted_simple_directive_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "string"
+        }
+      ]
+    },
+    "non_quoted_simple_directive_name": {
+      "type": "PATTERN",
+      "value": "[^\"'\\s<#\\\\](\\\\\\n|[^\\s\\\\])*"
+    },
+    "simple_param": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "non_string_param"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "line_continuation"
+        }
+      ]
+    },
+    "non_string_param": {
+      "type": "PATTERN",
+      "value": "[^\"'\\s][^\\\\\\s]*"
+    },
+    "tag_directive": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "<"
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "tag_name"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_optional_spaces"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "tag_param"
+          }
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": ">"
+                },
+                "named": true,
+                "value": "tag_param"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_optional_spaces"
+              }
+            ]
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ">"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_optional_spaces"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_of_line"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_directives"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": "</"
+        },
+        {
+          "type": "FIELD",
+          "name": "end_name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "tag_name"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_optional_spaces"
+        },
+        {
+          "type": "STRING",
+          "value": ">"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_of_line"
+        }
+      ]
+    },
+    "tag_name": {
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "[^>\\s\\\\]([^>\\s\\\\]|[\\\\>][^>\\s\\\\])*"
+      }
+    },
+    "_optional_spaces": {
+      "type": "PATTERN",
+      "value": "[ \\t]*"
+    },
+    "tag_param": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "non_string_tag_param"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "line_continuation"
+        }
+      ]
+    },
+    "non_string_tag_param": {
+      "type": "PATTERN",
+      "value": "([>\\\\]|[^\"'\">\\s\\\\])([^>\\s\\\\]|[>\\\\][^>\\s\\\\])*"
+    },
+    "_end_of_line": {
+      "type": "PATTERN",
+      "value": "\\r?\\n"
+    },
+    "line_continuation": {
+      "type": "PATTERN",
+      "value": "[\\\\]\\r?\\n"
+    },
+    "string": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "'"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "singlequote_string_content"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "line_continuation"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "\\'"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "\\"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "STRING",
+              "value": "'"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "\""
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "doublequote_string_content"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "line_continuation"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "\\\""
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "\\"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "STRING",
+              "value": "\""
+            }
+          ]
+        }
+      ]
+    },
+    "singlequote_string_content": {
+      "type": "PATTERN",
+      "value": "[^\\'\\r\\n\\\\]+"
+    },
+    "doublequote_string_content": {
+      "type": "PATTERN",
+      "value": "[^\\\"\\r\\n\\\\]+"
+    }
+  },
+  "extras": [
+    {
+      "type": "PATTERN",
+      "value": "[ \\t]"
+    }
+  ],
+  "conflicts": [],
+  "precedences": [],
+  "externals": [],
+  "inline": [],
+  "supertypes": [],
+  "reserved": {}
+}
